@@ -1,8 +1,7 @@
 /**
- * Family Tree Viewer - Professional Edition
- *
- * A clean, Win32-based application to visualize family structures from CSV.
- * Supports multiple spouses, ex-spouses, and automatic layout optimization.
+ * Family Tree Viewer - A clean, Win32-based application to visualize family structures from CSV.
+ * Built and Developed by Destio Hardiansyah (125103087)
+ * Teknik Informatika - Universitas Paramadina
  */
 
 #ifndef UNICODE
