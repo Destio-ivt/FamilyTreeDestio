@@ -1,0 +1,52 @@
+# depslib dependency file v1.0
+1767860770 source:c:\users\destio hardiansyah\onedrive\desktop\tugas kuliah\familytreedestio\main.cpp
+	<windows.h>
+	<tchar.h>
+	<string>
+	<vector>
+	<map>
+	<set>
+	<algorithm>
+	<fstream>
+	<sstream>
+	<cmath>
+
+1767724175 source:c:\users\destio hardiansyah\onedrive\desktop\tugas kuliah\familytreedestio\dataloader.cpp
+	"DataLoader.h"
+	"Globals.h"
+	<fstream>
+	<sstream>
+
+1767724174 c:\users\destio hardiansyah\onedrive\desktop\tugas kuliah\familytreedestio\dataloader.h
+
+1767724165 c:\users\destio hardiansyah\onedrive\desktop\tugas kuliah\familytreedestio\globals.h
+	"Common.h"
+
+1767724156 c:\users\destio hardiansyah\onedrive\desktop\tugas kuliah\familytreedestio\common.h
+	<windows.h>
+	<string>
+	<vector>
+	<map>
+	<set>
+	<algorithm>
+	<cmath>
+	<tchar.h>
+
+1767724166 source:c:\users\destio hardiansyah\onedrive\desktop\tugas kuliah\familytreedestio\globals.cpp
+	"Globals.h"
+	<fstream>
+	<sstream>
+
+1767724201 c:\users\destio hardiansyah\onedrive\desktop\tugas kuliah\familytreedestio\layout.h
+
+1767724217 c:\users\destio hardiansyah\onedrive\desktop\tugas kuliah\familytreedestio\renderer.h
+	"Common.h"
+
+1767724218 source:c:\users\destio hardiansyah\onedrive\desktop\tugas kuliah\familytreedestio\renderer.cpp
+	"Renderer.h"
+	"Globals.h"
+
+1767724901 source:c:\users\destio hardiansyah\onedrive\desktop\tugas kuliah\familytreedestio\layout.cpp
+	"Layout.h"
+	"Globals.h"
+

@@ -1,0 +1,115 @@
+ID,Name,Role,Gender,FatherID,MotherID,SpouseID
+00001,Asmawi,Grandfather,Male,0,0,00011
+00011,Nasah,Grandmother,Female,0,0,00001
+
+00002,Opah,Grandfather,Male,0,0,00021
+00021,Omah,Grandmother,Female,0,0,00002
+
+00101,Subur,Uncle,Male,00001,00011,00111x|00112
+00111,Suwarni,Aunt,Female,0,0,00101x
+00112,Fitri,Aunt,Female,0,0,00101
+
+00102,Royati,Aunt,Female,00001,00011,00121x
+00121,Hasan Basri,Uncle,Male,0,0,00102x
+
+00103,Aklimah,Aunt,Female,00001,00011,00131
+00131,Marulloh,Uncle,Male,0,0,00103
+
+00104,Sugandi,Father,Male,00001,00011,00141
+00141,Yunita Sari,Mother,Female,00002,00021,00104
+
+00201,Mamah,Aunt,Female,00002,00021,00211
+00211,Papah,Uncle,Male,0,0,00201
+
+00202,Papah Tuan,Uncle,Male,00002,00021,00221
+00221,Mamah Tuan,Aunt,Female,0,0,00202
+
+00203,Batih,Uncle,Male,00002,00021,00231x
+00231,Istrinya Batih,Aunt,Female,0,0,00203x
+
+00204,Ammah,Aunt,Female,00002,00021,00241
+00241,Pahwan,Uncle,Male,0,0,00204
+
+00205,Pangkal,Uncle,Male,00002,00021,00251
+00251,Tia,Aunt,Female,0,0,00205
+
+01001,Fatihah Indriyani,Cousin,Female,00101,00111,01011x|01012
+01011,Anto,Ex-Cousin in law,Male,0,0,01001x
+01012,Agus Kusnawan,Cousin in law,Male,0,0,01001
+
+01002,Ilham Hidayat,Cousin,Male,00101,00111,01021
+01021,Windah,Cousin in law,Female,0,0,01002
+
+01003,Nurul C. Hayati,Cousin,Female,00101,00111,01031
+01031,Indra,Cousin in law,Male,0,0,01003
+
+01004,Fitria N. Fazila,Cousin,Female,00101,00111,01041
+01041,Rois,Cousin in law,Male,0,0,01004
+
+01101,Heni R. Widyastuti,Cousin,Female,00102,00121,01111x|01112
+01111,M. Firmansyah,Ex-Cousin in law,Male,0,0,01101x
+01112,Dede,Cousin in law,Male,0,0,01101
+
+01102,Hasriyati B. Saputri,Cousin,Female,00102,00121,01121x|01122
+01121,Mantannya putri,Ex-Cousin in law,Male,0,0,01102x
+01122,Suaminya putri,Cousin in law,Male,0,0,01102
+
+01103,Nazua N. Julianti,Cousin,Female,00102,00121,0
+
+01201,Salsa A. Zahra,Cousin,Female,00103,00131,01211
+01211,Tubagus,Cousin in law,Male,0,0,01201
+
+01202,Zaky A. Al-Abith,Cousin,Male,00103,00131,0
+01203,Safa,Cousin,Female,00103,00131,0
+01204,Raziq,Cousin,Male,00103,00131,0
+
+01301,Andita Amelia,Sister,Female,00104,00141,0
+01302,Destio Hardiansyah,Myself,Male,00104,00141,0
+01303,Raisya S. Putri,Sister,Female,00104,00141,0
+
+02001,Yelse I. Saputri,Cousin,Female,00201,00211,02011x|02012
+02011,Mantannya Yelse,Ex-Cousin in law,Male,0,0,02001x
+02012,Reza,Cousin in law,Male,0,0,02001
+
+02002,Ade D. Putri,Cousin,Female,00201,00211,02021
+02021,Rian,Cousin in law,Male,0,0,02002
+
+02003,Edo,Cousin,Male,00201,00211,0
+02004,Nanda Wulandari,Cousin,Female,00201,00211,0
+02005,Ragil,Cousin,Male,00201,00211,0
+
+02101,Anaknya Papah Tuan,Cousin,Male,00202,00221,0
+02102,Anaknya Papah Tuan 2,Cousin,Male,00202,00221,0
+
+02201,Dea,Cousin,Female,00203,00231,0
+02202,Adeknya dea,Cousin,Female,00203,00231,0
+02203,Adiknya dea 2,Cousin,Male,00203,00231,0
+
+02301,Wilni,Cousin,Female,00204,00241,0
+02302,Antani,Cousin,Female,00204,00241,0
+
+02401,Fathar,Cousin,Male,00205,00251,0
+02402,Adeknya Fathar,Cousin,Male,00205,00251,0
+
+10001,Amanda Z. Rahmah,Niece,Female,01001,01011,0
+
+10101,Hasan Al-Abih,Nephew,Male,01002,01021,0
+
+10201,Arsya,Nephew,Male,01003,01031,0
+
+10301,Eiliyah,Niece,Female,01004,01041,0
+
+11001,Sultan,Nephew,Male,01101,01111,0
+
+11002,Nay,Niece,Female,01101,01112,0
+11003,Adeknya Nay,Nephew,Male,01101,01112,0
+
+11101,Zidan,Nephew,Male,01102,01121,0
+
+12001,Karim,Nephew,Male,01201,01211,0
+
+20001,Anaknya Yelse,Nephew,Male,02001,02012,0
+20002,Quenza,Niece,Female,02001,02012,0
+
+20101,Rayyanza,Nephew,Male,02002,02021,0
+20102,Adiknya Rayyanza,Nephew,Male,02002,02021,0

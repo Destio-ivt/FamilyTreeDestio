@@ -1,0 +1,244 @@
+PSEUDOCODE: Family Tree Viewer Application
+
+OBJECTIVE:
+    Visualize a family tree from a CSV file using a Win32 GUI application. 
+    Support multiple spouses, ex-spouses, automatic layout, and hot-reloading.
+
+1. DATA STRUCTURES & CONFIGURATION
+
+    CONSTANT CONFIG:
+        Box Dimensions: Width=200, Height=75
+        Gaps: Vertical=150, Horizontal=50, Spouse=25
+        Colors: 
+            Canvas=White
+            Box=Default(White), Female(Pink), Focus(Yellow)
+            Lines=Child(Gray), CurrentSpouse(Red), ExSpouse(Dotted Gray)
+
+    STRUCTURE Person:
+        Integer: ID
+        String: Name, Role, Gender
+        Integer: FatherID, MotherID
+        Vector<Integer>: Spouses       // List of spouse IDs
+        Set<Integer>: ExSpouses        // Subset of IDs marked as 'ex'
+        
+        // Visualization Fields
+        Integer: X, Y
+        Integer: GenerationLevel
+
+2. MAIN APPLICATION FLOW
+
+    FUNCTION WinMain:
+        Initialize Window Class (White Background, Event Handler)
+        Create Window "Family Tree Viewer"
+        Initialize Application State (Load Data)
+        Start Message Loop:
+            While GetMessage:
+                Dispatch Message to WindowProcedure
+
+    FUNCTION WindowProcedure (Event Handler):
+        SWITCH Message:
+            CASE WM_CREATE:
+                Call App.Init()
+            CASE WM_TIMER:
+                Call App.CheckFileUpdates() // Auto-reload every 1s
+            CASE WM_PAINT:
+                Call App.OnPaint()
+            CASE WM_SCROLL:
+                Call App.OnScroll()
+            CASE WM_DESTROY:
+                Quit Application
+
+3. DATA LOADING (DataModel)
+
+    FUNCTION LoadFromFile(FilePath):
+        Clear existing People list and ID Map
+        Open FilePath
+        Skip Header Line
+        
+        WHILE Read Line from File:
+            Parse CSV Columns -> ID, Name, Role, Gender, FatherID, MotherID, SpouseString
+            
+            Create New Person P
+            Assign Basic Fields
+            
+            // Parse Spouses Column (e.g., "2x|3|4")
+            Split SpouseString by '|' delimiter into Tokens
+            FOR EACH Token:
+                Check for 'x' suffix
+                IF suffix is 'x':
+                    Mark as Ex-Spouse
+                    Remove 'x'
+                Parse ID
+                Add ID to P.Spouses
+                IF MarkedEx: Add ID to P.ExSpouses
+            
+            Add P to People List
+            Map ID -> Index in List
+
+4. LAYOUT ALGORITHM (LayoutEngine)
+
+    FUNCTION RecalculateLayout:
+        Reset all coordinates to -10000 (Hidden)
+        
+        // Step 1: Assign Generation Levels
+        Loop until stable:
+            For each Person P:
+                Gen = Max(Father.Gen, Mother.Gen) + 1
+                If Parents Unknown:
+                    Inherit Gen from Spouse if available
+                    Else Gen = 0 (Root)
+        
+        // Step 2: Assign "Tree Ownership"
+        // Prevents duplicate drawing if someone appears in multiple sub-trees (e.g., in-laws)
+        Identify Clusters based on Marriage
+        For each Root Person (Gen 0):
+            If Root ID is smallest in marriage cluster:
+                Run BFS to claim all descendants and spouses as "Owned" by this Root ID
+        
+        // Step 3: Positioning
+        CurrentX = 50
+        CurrentY = 50
+        
+        FOR EACH Person P in Model:
+            IF P is Gen 0 AND P owns themselves:
+                
+                // Gap Logic
+                IF Previous Tree was drawn AND is related (linked):
+                    Add Small Gap
+                ELSE:
+                    Add Large Gap
+                
+                CalculateSubtreeWidth(P)
+                PositionSubtree(P, CurrentX, CurrentY)
+                
+                CurrentX += SubtreeWidth(P)
+        
+        Update Scrollbar Limits based on Max X/Y used.
+
+    FUNCTION CalculateSubtreeWidth(PersonID):
+        // Recursive function to determine how wide a family branch is
+        
+        Person = Get(PersonID)
+        NumSpouses = Length(Person.Spouses)
+        
+        // Width of the Parents Block (Spouses + Main + Spouses)
+        ParentsBlockWidth = (BoxWidth * (1 + NumSpouses)) + Spacing
+        
+        // Width of Children
+        Children = GetSortedChildren(PersonID)
+        ChildrenTotalWidth = Sum(CalculateSubtreeWidth(Child) for Child in Children)
+        
+        TotalWidth = Max(ParentsBlockWidth, ChildrenTotalWidth)
+        Return TotalWidth
+
+    FUNCTION PositionSubtree(PersonID, CenterX, Y):
+        Person = Get(PersonID)
+        
+        // 1. Layout Parents Block (Centered Logic)
+        // Order: [Left Spouses] - [Main Person] - [Right Spouses]
+        
+        NumSpouses = Length(Person.Spouses)
+        SplitIndex = NumSpouses / 2
+        
+        StartX = CenterX - (ParentsBlockWidth / 2)
+        
+        // Place Left Spouses
+        FOR i = 0 TO SplitIndex - 1:
+            Place Spouse[i] at StartX
+            StartX += BoxWidth + Gap
+            
+        // Place Main Person
+        Person.X = StartX
+        Person.Y = Y
+        StartX += BoxWidth + Gap
+        
+        // Place Right Spouses
+        FOR i = SplitIndex TO NumSpouses - 1:
+            Place Spouse[i] at StartX
+            StartX += BoxWidth + Gap
+            
+        // 2. Layout Children
+        Children = GetSortedChildren(PersonID)
+        CurrentChildX = CenterX - (ChildrenTotalWidth / 2)
+        
+        FOR EACH Child in Children:
+            PositionSubtree(Child, CurrentChildX, Y + VerticalGap)
+            CurrentChildX += Child.Width + Gap
+
+    FUNCTION GetSortedChildren(PersonID):
+        // Sort children so they appear underneath their specific parent-pair
+        // Logic:
+        // - If Child belongs to Left Spouse -> Sort First
+        // - If Child belongs to Single/Main Parent -> Sort Middle
+        // - If Child belongs to Right Spouse -> Sort Last
+        
+        Return Sorted List of Children IDs
+
+5. RENDERING SYSTEM (Renderer)
+
+    FUNCTION DrawTree(DeviceContext, DataModel):
+        Draw Header "My Family Tree" at Top Center
+        
+        // Pass 1: Draw Connector Lines (Behind Boxes)
+        FOR EACH Person P:
+            IF P has Spouses:
+                DrawSpouseConnectors(P)
+            ELSE:
+                DrawSingleParentLine(P)
+                
+        // Pass 2: Draw Boxes (On Top)
+        FOR EACH Person P:
+            DrawBox(P)
+            
+        DrawLegend(BottomLeft)
+
+    FUNCTION DrawSpouseConnectors(Person P):
+        Y = Center of Box
+        
+        FOR EACH SpouseID in P.Spouses:
+            Spouse = Get(SpouseID)
+            
+            // 1. Draw Horizontal Line
+            Style = (Spouse is Ex) ? DOTTED : SOLID
+            Color = (Spouse is Ex) ? GRAY : RED
+            Draw Line from P.X to Spouse.X using Style/Color
+            
+            // 2. Draw Child Drop Lines
+            Find Children common to (P, Spouse)
+            IF Children exist:
+                Find Center Point between P and Spouse
+                Draw Line Down
+                FOR EACH Child:
+                    Draw Orthogonal Line (Right Angles) to Child.Top
+
+    FUNCTION DrawBox(Person P):
+        Draw Rectangle at P.X, P.Y
+        Fill with Color based on Gender/Focus
+        Draw Shadow Offset
+        Draw Name (Bold)
+        Draw Role (Regular)
+
+    FUNCTION DrawLegend(Area):
+        Draw Background Box at Fixed Bottom-Left Coordinates
+        Draw Color Keys: "Male", "Female", "Me"
+        Draw Line Keys: "Current Spouse" (Red), "Ex-Spouse" (Dashed), "Child" (Gray)
+
+6. SCROLLING & INTERACTIVITY
+
+    FUNCTION OnPaint:
+        Create Double Buffer (Memory Bitmap) to prevent flickering
+        Clear Background
+        
+        Apply Coordinate Transform (Translate by -ScrollX, -ScrollY)
+        Call Renderer.DrawTree()
+        
+        Reset Coordinate Transform (Identity)
+        Call Renderer.DrawLegend() // Drawn absolute, not scrolled
+        
+        Copy Memory Bitmap to Screen (BitBlt)
+
+    FUNCTION OnScroll(Direction):
+        Update ScrollX or ScrollY variable
+        Clamp values to Content Size
+        Update Windows Scrollbar Position (SetScrollInfo)
+        Trigger Repaint (InvalidateRect)
