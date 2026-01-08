@@ -697,7 +697,7 @@ private:
 
         // 2. Background
         COLORREF bg = Config::COL_BOX_DEFAULT;
-        if (p.name.find(L"Destio") != std::string::npos) bg = Config::COL_BOX_FOCUS;
+        if (p.role.find(L"Myself") != std::string::npos) bg = Config::COL_BOX_FOCUS;
         else if (p.IsFemale()) bg = Config::COL_BOX_FEMALE;
 
         {
