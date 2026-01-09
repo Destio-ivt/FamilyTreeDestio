@@ -35,7 +35,7 @@ namespace Config {
     const int SPOUSE_GAP    = 25;   // Gap between spouses
     const int TREE_GAP      = 0;   // Gap between separate family trees
 
-    const wchar_t* DATA_FILE = L"family.csv";
+    const wchar_t* DATA_FILE = L"Family.csv";
 
     // Colors
     const COLORREF COL_BG_CANVAS     = RGB(250, 250, 252); // Very light gray/white
