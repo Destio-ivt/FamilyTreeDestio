@@ -22,6 +22,8 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <ctime>
+#include <cstdio>
 
 // -----------------------------------------------------------------------------
 // 1. CONFIGURATION
@@ -51,6 +53,9 @@ namespace Config {
     const COLORREF LINE_CHILD_NORMAL = RGB(180, 180, 180);
     const COLORREF LINE_SPOUSE_CURR  = RGB(220, 80, 80);   // Red/Pink for current
     const COLORREF LINE_SPOUSE_EX    = RGB(220, 80, 80); // Gray for ex
+
+    // UI IDs
+    const int ID_BTN_SCREENSHOT = 101;
 }
 
 // -----------------------------------------------------------------------------
@@ -82,6 +87,58 @@ std::wstring ToWString(const std::string& str) {
     std::wstring wstr(size, 0);
     MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstr[0], size);
     return wstr;
+}
+
+// Helper to save HBITMAP to file
+bool SaveBitmapToFile(HBITMAP hBitmap, const std::wstring& filePath) {
+    HDC hDC = GetDC(NULL);
+    HDC hMemDC = CreateCompatibleDC(hDC);
+
+    BITMAP bmp;
+    GetObject(hBitmap, sizeof(BITMAP), &bmp);
+
+    BITMAPINFOHEADER bi;
+    ZeroMemory(&bi, sizeof(BITMAPINFOHEADER));
+    bi.biSize = sizeof(BITMAPINFOHEADER);
+    bi.biWidth = bmp.bmWidth;
+    bi.biHeight = bmp.bmHeight;
+    bi.biPlanes = 1;
+    bi.biBitCount = 32;
+    bi.biCompression = BI_RGB;
+
+    DWORD dwBmpSize = ((bmp.bmWidth * bi.biBitCount + 31) / 32) * 4 * bmp.bmHeight;
+    HANDLE hDIB = GlobalAlloc(GHND, dwBmpSize);
+    char* lpbitmap = (char*)GlobalLock(hDIB);
+
+    GetDIBits(hDC, hBitmap, 0, (UINT)bmp.bmHeight, lpbitmap, (BITMAPINFO*)&bi, DIB_RGB_COLORS);
+
+    HANDLE hFile = CreateFileW(filePath.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        GlobalUnlock(hDIB);
+        GlobalFree(hDIB);
+        DeleteDC(hMemDC);
+        ReleaseDC(NULL, hDC);
+        return false;
+    }
+
+    BITMAPFILEHEADER bmfHeader;
+    bmfHeader.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER);
+    bmfHeader.bfSize = dwBmpSize + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+    bmfHeader.bfType = 0x4D42; // "BM"
+    bmfHeader.bfReserved1 = 0;
+    bmfHeader.bfReserved2 = 0;
+
+    DWORD dwBytesWritten = 0;
+    WriteFile(hFile, (LPSTR)&bmfHeader, sizeof(BITMAPFILEHEADER), &dwBytesWritten, NULL);
+    WriteFile(hFile, (LPSTR)&bi, sizeof(BITMAPINFOHEADER), &dwBytesWritten, NULL);
+    WriteFile(hFile, (LPSTR)lpbitmap, dwBmpSize, &dwBytesWritten, NULL);
+
+    CloseHandle(hFile);
+    GlobalUnlock(hDIB);
+    GlobalFree(hDIB);
+    DeleteDC(hMemDC);
+    ReleaseDC(NULL, hDC);
+    return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -740,6 +797,7 @@ private:
 // -----------------------------------------------------------------------------
 class FamilyTreeApp {
     HWND hwnd = nullptr;
+    HWND hBtnScreenshot = nullptr;
     DataModel data;
     LayoutEngine layout;
     FILETIME lastModTime = {0};
@@ -750,6 +808,21 @@ public:
 
     void Init(HWND h) {
         hwnd = h;
+
+        // Create Screenshot Button
+        hBtnScreenshot = CreateWindowW(
+            L"BUTTON", L"Screenshot",
+            WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+            0, 0, 100, 30, // Pos & Size (updated in OnSize)
+            hwnd, (HMENU)Config::ID_BTN_SCREENSHOT,
+            (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL
+        );
+
+        // Set a modern font for the button
+        HFONT hFont = CreateFont(16, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET,
+                                 0, 0, ANTIALIASED_QUALITY, 0, L"Segoe UI");
+        SendMessage(hBtnScreenshot, WM_SETFONT, (WPARAM)hFont, TRUE);
+
         ReloadData(true);
         SetTimer(hwnd, 1, 1000, NULL); // Auto-reload timer
     }
@@ -790,7 +863,17 @@ public:
         EndPaint(hwnd, &ps);
     }
 
-    void OnSize() { UpdateScrollBars(); }
+    void OnSize() {
+        RECT rc;
+        GetClientRect(hwnd, &rc);
+
+        // Position button in top-right corner
+        int btnW = 100;
+        int btnH = 30;
+        SetWindowPos(hBtnScreenshot, NULL, rc.right - btnW - 20, 20, btnW, btnH, SWP_NOZORDER);
+
+        UpdateScrollBars();
+    }
 
     void OnScroll(int bar, WPARAM wParam) {
         int& pos = (bar == SB_HORZ) ? scrollX : scrollY;
@@ -811,6 +894,62 @@ public:
         InvalidateRect(hwnd, NULL, TRUE);
     }
 
+        void CaptureScreenshot() {
+            // Use total layout dimensions to capture everything
+            int w = layout.totalWidth;
+            int h = layout.totalHeight;
+    
+            // Minimum safety size
+            if (w < 800) w = 800;
+            if (h < 600) h = 600;
+    
+            HDC hdcScreen = GetDC(NULL);
+            HDC hdcMem = CreateCompatibleDC(hdcScreen);
+            HBITMAP hbm = CreateCompatibleBitmap(hdcScreen, w, h);
+            HGDIOBJ oldBm = SelectObject(hdcMem, hbm);
+            
+            // 1. Fill Background
+            ScopedGDI<HBRUSH> hBg(CreateSolidBrush(Config::COL_BG_CANVAS));
+            RECT rc = {0, 0, w, h};
+            FillRect(hdcMem, &rc, hBg);
+            
+            // 2. Draw Content
+            // We use identity transform because we want to draw from (0,0) of the canvas
+            SetGraphicsMode(hdcMem, GM_ADVANCED);
+            XFORM xform = { 1.0f, 0, 0, 1.0f, 0.0f, 0.0f };
+            SetWorldTransform(hdcMem, &xform);
+    
+            // Draw the tree
+            Renderer::DrawTree(hdcMem, &data, w);
+    
+            // Draw Legend (at the bottom of the full canvas)
+            ModifyWorldTransform(hdcMem, &xform, MWT_IDENTITY);
+            Renderer::DrawLegend(hdcMem, h);
+            
+            // 3. Generate filename
+            time_t t = time(NULL);
+            struct tm* now = localtime(&t);
+            wchar_t filename[MAX_PATH];
+            swprintf(filename, MAX_PATH, L"family_tree_%04d-%02d-%02d_%02d-%02d-%02d.bmp", 
+                     now->tm_year + 1900, now->tm_mon + 1, now->tm_mday,
+                     now->tm_hour, now->tm_min, now->tm_sec);
+                     
+            bool success = SaveBitmapToFile(hbm, filename);
+            
+            // Cleanup
+            SelectObject(hdcMem, oldBm); // Restore old object before deleting
+            DeleteObject(hbm);
+            DeleteDC(hdcMem);
+            ReleaseDC(NULL, hdcScreen);
+            
+            if (success) {
+                std::wstring msg = L"Full family tree saved to:\n";
+                msg += filename;
+                MessageBoxW(hwnd, msg.c_str(), L"Screenshot Saved", MB_OK | MB_ICONINFORMATION);
+            } else {
+                MessageBoxW(hwnd, L"Failed to save screenshot.", L"Error", MB_OK | MB_ICONERROR);
+            }
+        }
 private:
     void ReloadData(bool force) {
         WIN32_FILE_ATTRIBUTE_DATA attrib;
@@ -830,7 +969,8 @@ private:
     }
 
     void UpdateScrollBars() {
-        RECT rc; GetClientRect(hwnd, &rc);
+        RECT rc;
+        GetClientRect(hwnd, &rc);
         SetScrollInfoHelper(SB_HORZ, scrollX, layout.totalWidth, rc.right);
         SetScrollInfoHelper(SB_VERT, scrollY, layout.totalHeight, rc.bottom);
     }
@@ -847,6 +987,11 @@ static FamilyTreeApp g_App;
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     switch(msg) {
         case WM_CREATE: g_App.Init(hwnd); break;
+        case WM_COMMAND:
+            if (LOWORD(wp) == Config::ID_BTN_SCREENSHOT) {
+                g_App.CaptureScreenshot();
+            }
+            break;
         case WM_TIMER:  g_App.OnTimer(); break;
         case WM_PAINT:  g_App.OnPaint(); break;
         case WM_SIZE:   g_App.OnSize(); break;

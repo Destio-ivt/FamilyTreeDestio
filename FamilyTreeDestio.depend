@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1767869180 source:c:\users\destio hardiansyah\onedrive\desktop\tugas kuliah\familytreedestio\main.cpp
+1769004061 source:c:\users\destio hardiansyah\onedrive\desktop\tugas kuliah\familytreedestio\main.cpp
 	<windows.h>
 	<tchar.h>
 	<string>
@@ -10,6 +10,8 @@
 	<fstream>
 	<sstream>
 	<cmath>
+	<ctime>
+	<cstdio>
 
 1767724175 source:c:\users\destio hardiansyah\onedrive\desktop\tugas kuliah\familytreedestio\dataloader.cpp
 	"DataLoader.h"

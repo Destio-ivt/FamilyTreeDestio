@@ -1,1 +1,9 @@
 ID,Name,Role,Gender,FatherID,MotherID,SpouseID
+1,Asmawi,Grandfather,Male,0,0,6
+2,Sugandi,Father,Male,1,6,5
+3,Destio,Myself,Male,2,5,0
+4,Andita,Sister,Female,2,5,0
+5,Yunita Sari,Mother,Female,0,0,2
+6,Nasah,Grandmother,Female,0,0,1
+7,Subur,Uncle,Male,1,6,9
+9,Suwarni,Aunt,Female,0,0,7x
