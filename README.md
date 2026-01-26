@@ -21,7 +21,7 @@ Data keluarga dibaca secara dinamis dari file eksternal (`Family.csv`), memungki
 2.  **Data Dinamis :** Struktur keluarga (Orang tua, Anak, Pasangan) didefinisikan dalam file `Family.csv`.
 3.  **Auto-Layout:** Proyek ini sudah memiliki algoritma cerdas yang dapat menempatkan anggota keluarga menyesuaikan generasi, relasi, dan posisinya secara terstruktur.
 4.  **Hot-Reloading:** Jika file `Family.csv` diedit saat program berjalan, tampilan akan otomatis diperbarui.
-5.  **Export Full Screenshot:** Tombol khusus untuk menyimpan gambar silsilah keluarga secara utuh ke dalam file gambar (`.bmp`). Fitur ini akan merender seluruh anggota keluarga ke dalam satu file gambar.
+5.  **Export Full Screenshot:** Tombol khusus untuk menyimpan gambar silsilah keluarga secara utuh ke dalam file gambar (`.jpg`). Fitur ini akan merender seluruh anggota keluarga ke dalam satu file gambar.
 6.  **Dukungan Relasi Kompleks:** Menangani hubungan Orang Tua dengan Anak, Pasangan (Suami/Istri), dan Mantan Pasangan (Ex-Spouse).
 
 
@@ -51,7 +51,7 @@ Project ini dapat dikompilasi menggunakan **Code::Blocks**
 
 ### 3. Mengambil Screenshot
 Klik tombol **Screenshot** di pojok kanan atas aplikasi. 
-- Program akan otomatis membuat file gambar baru di folder project dengan format nama: `family_tree_YYYY-MM-DD_HH-MM-SS.bmp`.
+- Program akan otomatis membuat file gambar baru di folder project dengan format nama: `family_tree_YYYY-MM-DD_HH-MM-SS.jpg`.
 - Gambar tersebut akan berisi **seluruh** diagram silsilah keluarga, tidak terpotong layar.
 
 ---
@@ -61,16 +61,16 @@ Klik tombol **Screenshot** di pojok kanan atas aplikasi.
 Berikut adalah tampilan hasil program:
 
 ### Family Tree (Sederhana)
-![Main Tree View](family_tree_2026-01-21_20-56-55.bmp)
+![Main Tree View](family_tree_2026-01-21_20-56-55.jpg)
 
 Untuk lebih jelasnya bisa dilihat gambar berikut di dalam repository:
-family_tree_2026-01-21_20-56-55.bmp
+family_tree_2026-01-21_20-56-55.jpg
 
 ### Family Tree (Full Member)
-![Main Tree View](family_tree_2026-01-21_20-09-26.bmp)
+![Main Tree View](family_tree_2026-01-21_20-09-26.jpg)
 
 Untuk lebih jelasnya bisa dilihat gambar berikut di dalam repository:
-family_tree_2026-01-21_20-09-26.bmp
+family_tree_2026-01-21_20-09-26.jpg
 
 ### Legenda & Detail
 - **Kotak Putih:** Laki-laki
